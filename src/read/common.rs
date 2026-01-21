@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result, to_attribute_value};
 use std::collections;
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct SingleReadInput {
     pub(crate) consistent_read: Option<bool>,
     pub(crate) expression_attribute_names: Option<collections::HashMap<String, String>>,
@@ -16,7 +16,7 @@ pub(crate) struct SingleReadInput {
 /// Arguments for single-item read operations (GetItem).
 ///
 /// These arguments apply to operations that retrieve a single item, such as GetItem.
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct SingleReadArgs {
     /// Whether to use a consistent read.
     ///
@@ -53,7 +53,7 @@ impl From<SingleReadArgs> for SingleReadInput {
     }
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct MultipleReadInput {
     pub(crate) consistent_read: Option<bool>,
     pub(crate) exclusive_start_key: Option<collections::HashMap<String, types::AttributeValue>>,
@@ -71,7 +71,7 @@ pub(crate) struct MultipleReadInput {
 /// Arguments for multiple-item read operations (Query, Scan).
 ///
 /// These arguments apply to operations that can return multiple items, such as Query and Scan.
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct MultipleReadArgs<T> {
     /// Filter condition to apply to the results.
     ///

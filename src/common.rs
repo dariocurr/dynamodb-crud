@@ -34,7 +34,7 @@ fn get_expression(left: String, operator: &str, right: String) -> String {
 }
 
 /// expression operation
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct ExpressionInput {
     pub(crate) expression: String,
     pub(crate) expression_attribute_names: collections::HashMap<String, String>,

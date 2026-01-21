@@ -13,7 +13,7 @@ use std::{collections, hash};
 ///     "name".to_string(),
 /// ]);
 /// ```
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SelectionMap {
     /// Leaf selection - a flat list of attribute names to select.
     Leaves(Vec<String>),

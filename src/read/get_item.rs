@@ -6,7 +6,7 @@ use serde_dynamo::{Error, Result};
 use std::collections;
 
 /// get item operation
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct GetItemInput {
     keys: collections::HashMap<String, types::AttributeValue>,
     return_consumed_capacity: Option<types::ReturnConsumedCapacity>,
@@ -38,7 +38,7 @@ struct GetItemInput {
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct GetItem<T> {
     /// The primary key of the item to retrieve.
     pub keys: common::key::Keys<T>,

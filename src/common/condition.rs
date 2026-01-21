@@ -7,7 +7,7 @@ use serde_dynamo::{Error, Result, to_attribute_value};
 use std::{collections, ops};
 
 /// Logical operator for combining conditions.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum LogicalOperator {
     /// Logical AND - all conditions must be true.
     And,
@@ -35,7 +35,7 @@ impl ops::Deref for LogicalOperator {
 /// let gt = condition::Condition::GreaterThan(100);
 /// let null: condition::Condition<String> = condition::Condition::Null;
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Condition<T> {
     /// Checks if an attribute begins with a specified prefix (string types only).
     BeginsWith(String),
@@ -186,7 +186,7 @@ impl<T: Serialize> Condition<T> {
 }
 
 /// Condition applied to an attribute.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct KeyCondition<T> {
     /// The condition to apply to the attribute.
     pub condition: Condition<T>,
@@ -234,7 +234,7 @@ impl<T: Serialize> KeyCondition<T> {
 ///     ],
 /// );
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ConditionMap<T> {
     /// Leaf conditions - flat list of conditions combined with the logical operator.
     Leaves(LogicalOperator, Vec<KeyCondition<T>>),

@@ -36,7 +36,7 @@ use std::collections;
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct BatchGetItem<T> {
     /// A map of read arguments to lists of keys to retrieve.
     pub items: IndexMap<read::common::SingleReadArgs, Vec<common::key::Keys<T>>>,

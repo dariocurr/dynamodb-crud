@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result};
 
 /// query operation
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct QueryInput {
     key_condition_expression: String,
     multiple_read_operation: read::common::MultipleReadInput,
@@ -35,7 +35,7 @@ struct QueryInput {
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Query<T> {
     /// Additional read operation arguments (table name, filter, selection, etc.).
     pub multiple_read_args: read::common::MultipleReadArgs<T>,

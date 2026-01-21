@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result};
 
 /// scan operation
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct ScanInput {
     multiple_read_operation: read::common::MultipleReadInput,
     return_consumed_capacity: Option<types::ReturnConsumedCapacity>,
@@ -32,7 +32,7 @@ struct ScanInput {
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Scan<T> {
     /// Additional read operation arguments (table name, filter, selection, etc.).
     pub multiple_read_args: read::common::MultipleReadArgs<T>,

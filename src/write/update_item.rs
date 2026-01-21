@@ -7,7 +7,7 @@ use serde_dynamo::{Error, Result, to_attribute_value};
 use std::collections;
 
 /// Map for ADD and DELETE operations.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum AddOrDeleteInputsMap<T> {
     /// Leaf operations - flat list of (attribute_name, value) pairs.
     Leaves(Vec<(String, T)>),
@@ -68,7 +68,7 @@ impl<T: Serialize> AddOrDeleteInputsMap<T> {
 /// let assign = update_item::SetInput::Assign("value".to_string());
 /// let increment = update_item::SetInput::Increment(10);
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SetInput<T> {
     /// Assign a new value to the attribute (replaces existing value).
     Assign(T),
@@ -117,7 +117,7 @@ impl<T> SetInput<T> {
 }
 
 /// Map for SET operations.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SetInputsMap<T> {
     /// Leaf operations - flat list of (attribute_name, set_operation) pairs.
     Leaves(Vec<(String, SetInput<T>)>),
@@ -181,7 +181,7 @@ impl<T: Serialize> SetInputsMap<T> {
 ///     ]),
 /// );
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum UpdateExpressionMap<T> {
     /// ADD operations - add values to numbers or sets.
     Add(AddOrDeleteInputsMap<T>),
@@ -247,7 +247,7 @@ impl<T: Serialize> TryFrom<UpdateExpressionMap<T>> for common::ExpressionInput {
 }
 
 /// update item operation
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct UpdateItemInput {
     keys: collections::HashMap<String, types::AttributeValue>,
     update_expression: String,
@@ -283,7 +283,7 @@ struct UpdateItemInput {
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct UpdateItem<T> {
     /// The primary key of the item to update.
     pub keys: common::key::Keys<T>,

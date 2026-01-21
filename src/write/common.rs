@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result};
 use std::collections;
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct WriteInput {
     pub(crate) condition_expression: Option<String>,
     pub(crate) expression_attribute_names: Option<collections::HashMap<String, String>>,
@@ -22,7 +22,7 @@ pub(crate) struct WriteInput {
 /// Arguments common to all write operations (Put, Update, Delete).
 ///
 /// These arguments apply to operations that modify data in DynamoDB tables.
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct WriteArgs<T> {
     /// Condition expression that must be true for the operation to succeed.
     ///

@@ -13,7 +13,7 @@ use std::collections;
 ///     value: "1".to_string(),
 /// };
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Key<T> {
     /// The attribute name of the key.
     pub name: String,
@@ -34,7 +34,7 @@ pub struct Key<T> {
 ///     ..Default::default()
 /// };
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Keys<T> {
     /// The partition key (required).
     pub partition_key: Key<T>,

@@ -6,14 +6,14 @@ use serde_dynamo::{Error, Result, to_item};
 use std::collections;
 
 /// A put item request within a batch write operation.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BatchWriteItemRequestPutItem<T> {
     /// The item to put into the table.
     pub item: T,
 }
 
 /// A delete item request within a batch write operation.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BatchWriteItemRequestDeleteItem<T> {
     /// The primary key of the item to delete.
     pub keys: common::key::Keys<T>,
@@ -22,7 +22,7 @@ pub struct BatchWriteItemRequestDeleteItem<T> {
 /// A single request within a batch write operation.
 ///
 /// Each request can be either a PutItem (create/replace) or DeleteItem (remove) operation.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BatchWriteItemRequest<T> {
     /// Put item request - creates or replaces an item.
     PutItem(BatchWriteItemRequestPutItem<T>),
@@ -82,7 +82,7 @@ impl<T: Serialize> TryFrom<BatchWriteItemRequest<T>> for types::WriteRequest {
 /// # Ok(())
 /// # }
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct BatchWriteItem<T> {
     /// A map of table names to lists of write requests.
     pub request_items: collections::HashMap<String, Vec<BatchWriteItemRequest<T>>>,
