@@ -5,8 +5,10 @@ updates:
     directory: /
     schedule:
       interval: daily
+    target-branch: dev
 
   - package-ecosystem: cargo
     directory: /
     schedule:
       interval: daily
+    target-branch: dev
