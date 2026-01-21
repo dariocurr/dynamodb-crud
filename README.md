@@ -1,10 +1,10 @@
 # DynamoDB CRUD
 
-![Logo](assets/logo.png)
-
 [![Crates.io](https://img.shields.io/crates/v/dynamodb-crud.svg)](https://crates.io/crates/dynamodb-crud)
 [![Documentation](https://docs.rs/dynamodb-crud/badge.svg)](https://docs.rs/dynamodb-crud)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![Logo](assets/logo.png)
 
 **Type-safe DynamoDB operations that feel natural in Rust.**
 
