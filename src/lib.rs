@@ -1,3 +1,7 @@
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/dariocurr/dynamodb-crud/main/assets/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/dariocurr/dynamodb-crud/main/assets/logo.png"
+)]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
