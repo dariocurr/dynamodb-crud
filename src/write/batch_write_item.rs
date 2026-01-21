@@ -6,14 +6,14 @@ use serde_dynamo::{Error, Result, to_item};
 use std::collections;
 
 /// A put item request within a batch write operation.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct BatchWriteItemRequestPutItem<T> {
     /// The item to put into the table.
     pub item: T,
 }
 
 /// A delete item request within a batch write operation.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct BatchWriteItemRequestDeleteItem<T> {
     /// The primary key of the item to delete.
     pub keys: common::key::Keys<T>,

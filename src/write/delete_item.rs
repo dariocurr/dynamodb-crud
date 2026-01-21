@@ -6,7 +6,7 @@ use serde_dynamo::{Error, Result};
 use std::collections;
 
 /// delete item operation
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct DeleteItemInput {
     keys: collections::HashMap<String, types::AttributeValue>,
     write_operation: write::common::WriteInput,

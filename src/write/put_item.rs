@@ -6,7 +6,7 @@ use serde_dynamo::{Error, Result, to_item};
 use std::collections;
 
 /// put item operation
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct PutItemInput {
     item: collections::HashMap<String, types::AttributeValue>,
     write_operation: write::common::WriteInput,

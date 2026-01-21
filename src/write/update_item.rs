@@ -247,7 +247,7 @@ impl<T: Serialize> TryFrom<UpdateExpressionMap<T>> for common::ExpressionInput {
 }
 
 /// update item operation
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct UpdateItemInput {
     keys: collections::HashMap<String, types::AttributeValue>,
     update_expression: String,
