@@ -1,0 +1,146 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  release:
+    needs: validate
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: checkout origin repo
+        uses: actions/checkout@v6.0.1
+
+      - name: setup rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: cache rust
+        uses: Swatinem/rust-cache@v2.8.2
+
+      - name: install cargo-release
+        run: cargo install cargo-release
+
+      - name: cargo login
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: setup git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: release rust library
+        run: cargo release --execute --no-confirm --tag-prefix "" --unpublished
+
+      - name: output tag
+        id: tag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
+  github-release:
+    needs: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - name: create github release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+
+  publish-coverage:
+    needs: release
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: checkout origin repo
+        uses: actions/checkout@v6.0.1
+
+      - name: setup rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: cache rust
+        uses: Swatinem/rust-cache@v2.8.2
+
+      - name: install cargo-tarpaulin
+        run: cargo install cargo-tarpaulin
+
+      - name: generate coverage report
+        run: |
+          cargo tarpaulin --out html -- --test-threads=1
+          mkdir tarpaulin
+          mv ./tarpaulin-report.html ./tarpaulin/index.html
+
+      - name: upload github pages artifact
+        uses: actions/upload-pages-artifact@v4.0.0
+        with:
+          path: ./tarpaulin
+
+      - name: deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5
+
+  update-branches:
+    needs: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout origin repo
+        uses: actions/checkout@v6.0.1
+
+      - name: setup rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: cache rust
+        uses: Swatinem/rust-cache@v2.8.2
+
+      - name: merge main -> develop
+        uses: devmasx/merge-branch@v1.4.0
+        with:
+          from_branch: main
+          target_branch: develop
+          github_token: ${{ github.token }}
+          type: now
+
+      - name: checkout origin repo
+        uses: actions/checkout@v6.0.1
+        with:
+          ref: develop
+
+      - name: install cargo-release
+        run: cargo install cargo-release
+
+      - name: setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+
+      - name: update version
+        run: |
+          cargo release version patch --execute --no-confirm
+          git add Cargo.toml
+          git commit --message "ci: update patch version"
+          git push
