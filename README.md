@@ -4,7 +4,9 @@
 [![Documentation](https://docs.rs/dynamodb-crud/badge.svg)](https://docs.rs/dynamodb-crud)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Logo](assets/logo.png)
+<div align="center">
+  <img src="assets/logo.png" alt="Logo" width="200">
+</div>
 
 **Type-safe DynamoDB operations that feel natural in Rust.**
 
