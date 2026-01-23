@@ -1,6 +1,6 @@
 [package]
 name = "dynamodb-crud"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 description = "a type-safe, ergonomic interface for performing CRUD operations on Amazon DynamoDB tables"
 license = "MIT"
