@@ -90,7 +90,7 @@ impl<T: Serialize> Condition<T> {
                 let value_placeholder_2 = format!(":{}_between{}", key, index);
                 *index += 1;
                 let expression = format!(
-                    "({} BETWEEN {} AND {})",
+                    "{} BETWEEN {} AND {}",
                     key_placeholder, value_placeholder_1, value_placeholder_2
                 );
                 expression_attribute_values.insert(value_placeholder_1, value1);
@@ -246,17 +246,43 @@ impl<T: Serialize> TryFrom<ConditionMap<T>> for common::ExpressionInput {
     type Error = Error;
 
     fn try_from(condition_map: ConditionMap<T>) -> Result<Self> {
-        condition_map.get_expression_operation_recursive(&[], &mut 0)
+        condition_map.get_expression_operation_recursive(&[], &mut 0, false)
     }
 }
 
 impl<T: Serialize> ConditionMap<T> {
+    fn is_composite(&self, is_nested: bool) -> bool {
+        match self {
+            Self::Leaves(_, leaves) => is_nested && leaves.len() > 1,
+            Self::Node(_, map) => {
+                let has_multiple_keys = map.len() > 1;
+                let child_is_nested = is_nested || has_multiple_keys;
+                for value in map.values() {
+                    if value.is_composite(child_is_nested) {
+                        // if any child is composite, we don't need to wrap this node:
+                        // the child will be wrapped individually
+                        return false;
+                    }
+                }
+                if is_nested {
+                    // nested level: composite only if has multiple keys
+                    has_multiple_keys
+                } else {
+                    // root level: never composite
+                    false
+                }
+            }
+        }
+    }
+
     fn get_expression_operation_recursive(
         self,
         keys: &[String],
         index: &mut usize,
+        mut is_nested: bool,
     ) -> Result<common::ExpressionInput> {
         let mut operations = Vec::new();
+        let is_composite = self.is_composite(is_nested);
         let operator = match self {
             Self::Leaves(operator, key_conditions) => {
                 for key_condition in key_conditions {
@@ -279,10 +305,11 @@ impl<T: Serialize> ConditionMap<T> {
             }
             Self::Node(operator, map) => {
                 operations.reserve(map.len());
+                is_nested = is_nested || map.len() > 1;
                 for (key, value) in map {
                     let (placeholder, new_keys) = common::add_placeholder(keys, &key);
                     let mut condition_operation =
-                        value.get_expression_operation_recursive(&new_keys, index)?;
+                        value.get_expression_operation_recursive(&new_keys, index, is_nested)?;
                     condition_operation
                         .expression_attribute_names
                         .insert(placeholder, key);
@@ -292,7 +319,9 @@ impl<T: Serialize> ConditionMap<T> {
             }
         };
         let mut operation = common::ExpressionInput::merge(&operator, operations);
-        operation.expression = format!("({})", operation.expression);
+        if is_composite {
+            operation.expression = format!("({})", operation.expression);
+        }
         Ok(operation)
     }
 }
@@ -320,7 +349,7 @@ mod tests {
             ]
         ),
         common::ExpressionInput {
-            expression: "(#a = :a_eq0)".to_string(),
+            expression: "#a = :a_eq0".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [(
                     "#a".to_string(),
@@ -360,7 +389,7 @@ mod tests {
             ]
         ),
         common::ExpressionInput {
-            expression: "(#a = :a_eq0 AND #c = :c_eq1)".to_string(),
+            expression: "#a = :a_eq0 AND #c = :c_eq1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#a".to_string(), "a".to_string()),
@@ -409,7 +438,7 @@ mod tests {
             ]
         ),
         common::ExpressionInput {
-            expression: "((#a BETWEEN :a_between0 AND :a_between1) OR begins_with(#b, :b_begins_with2))".to_string(),
+            expression: "#a BETWEEN :a_between0 AND :a_between1 OR begins_with(#b, :b_begins_with2)".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#a".to_string(), "a".to_string()),
@@ -481,7 +510,7 @@ mod tests {
             )
         ),
         common::ExpressionInput {
-            expression: "((#a.#b = :b_eq0) AND (#b.#d = :d_eq1))".to_string(),
+            expression: "#a.#b = :b_eq0 AND #b.#d = :d_eq1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#a".to_string(), "a".to_string()),
@@ -575,7 +604,7 @@ mod tests {
             )
         ),
         common::ExpressionInput {
-            expression: "(((#a.#b.#c = :c_eq0 AND #a.#b.#e = :e_eq1)) AND (#b.#g = :g_eq2 OR #b.#i = :i_eq3))".to_string(),
+            expression: "(#a.#b.#c = :c_eq0 AND #a.#b.#e = :e_eq1) AND (#b.#g = :g_eq2 OR #b.#i = :i_eq3)".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#a".to_string(), "a".to_string()),
@@ -639,7 +668,7 @@ mod tests {
             ]
         ),
         common::ExpressionInput {
-            expression: "(#a = :a_eq0 OR #a = :a_eq1)".to_string(),
+            expression: "#a = :a_eq0 OR #a = :a_eq1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [(
                     "#a".to_string(),
@@ -687,7 +716,7 @@ mod tests {
             ]
         ),
         common::ExpressionInput {
-            expression: "(#a > :a_gt0 OR #a < :a_lt1)".to_string(),
+            expression: "#a > :a_gt0 OR #a < :a_lt1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [(
                     "#a".to_string(),
@@ -745,7 +774,7 @@ mod tests {
             )
         ),
         common::ExpressionInput {
-            expression: "((#a.#b = :b_eq0 OR #a.#b = :b_eq1))".to_string(),
+            expression: "#a.#b = :b_eq0 OR #a.#b = :b_eq1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#a".to_string(), "a".to_string()),
@@ -811,7 +840,7 @@ mod tests {
             )
         ),
         common::ExpressionInput {
-            expression: "((#x.#a = :a_eq0) AND (#y.#a = :a_eq1))".to_string(),
+            expression: "#x.#a = :a_eq0 AND #y.#a = :a_eq1".to_string(),
             expression_attribute_names: collections::HashMap::from(
                 [
                     ("#x".to_string(), "x".to_string()),

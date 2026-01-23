@@ -195,7 +195,7 @@ mod tests {
                     )
                 ),
                 filter_expression: Some(
-                    "(#a = :a_eq0)".to_string()
+                    "#a = :a_eq0".to_string()
                 ),
                 index_name: Some("e".to_string()),
                 limit: Some(10),

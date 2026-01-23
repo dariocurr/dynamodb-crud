@@ -155,7 +155,7 @@ mod tests {
             ),
             write_operation: write::common::WriteInput {
                 condition_expression: Some(
-                    "(#c = :c_eq0)".to_string()
+                    "#c = :c_eq0".to_string()
                 ),
                 expression_attribute_names: Some(
                     collections::HashMap::from(

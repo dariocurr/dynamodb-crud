@@ -1086,7 +1086,7 @@ mod tests {
             update_expression: "SET #c = :set0".to_string(),
             write_operation: write::common::WriteInput {
                 condition_expression: Some(
-                    "(#e = :e_eq0)".to_string()
+                    "#e = :e_eq0".to_string()
                 ),
                 expression_attribute_names: Some(
                     collections::HashMap::from(
