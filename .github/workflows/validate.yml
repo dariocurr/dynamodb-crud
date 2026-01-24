@@ -40,9 +40,6 @@ jobs:
       - name: install rust dependencies
         run: cargo install cargo-audit cargo-udeps --locked
 
-      - name: install cargo-audit
-        run: cargo install cargo-audit --locked
-
       - name: audit deps
         run: cargo +stable audit
 
