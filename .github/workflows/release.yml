@@ -59,47 +59,6 @@ jobs:
         with:
           tag_name: ${{ needs.release.outputs.tag }}
 
-  publish-coverage:
-    needs: release
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      contents: read
-      id-token: write
-      pages: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: checkout origin repo
-        uses: actions/checkout@v6.0.2
-
-      - name: setup rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-
-      - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
-
-      - name: install cargo-tarpaulin
-        run: cargo install cargo-tarpaulin
-
-      - name: generate coverage report
-        run: |
-          cargo tarpaulin --out html -- --test-threads=1
-          mkdir tarpaulin
-          mv ./tarpaulin-report.html ./tarpaulin/index.html
-
-      - name: upload github pages artifact
-        uses: actions/upload-pages-artifact@v4.0.0
-        with:
-          path: ./tarpaulin
-
-      - name: deploy to github pages
-        id: deployment
-        uses: actions/deploy-pages@v4.0.5
-
   update-branches:
     needs: release
     permissions:
