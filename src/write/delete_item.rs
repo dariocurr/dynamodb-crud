@@ -60,6 +60,10 @@ impl<T: Serialize> TryFrom<DeleteItem<T>> for DeleteItemInput {
 
 impl<T: Serialize> DeleteItem<T> {
     /// Execute the delete item operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.delete_item", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

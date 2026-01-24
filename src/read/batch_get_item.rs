@@ -76,6 +76,10 @@ impl<T: Serialize> TryFrom<BatchGetItem<T>> for operation::batch_get_item::Batch
 
 impl<T: Serialize> BatchGetItem<T> {
     /// Execute the batch get item operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.batch_get_item", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

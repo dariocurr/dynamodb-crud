@@ -315,6 +315,10 @@ impl<T: Serialize> TryFrom<UpdateItem<T>> for UpdateItemInput {
 
 impl<T: Serialize> UpdateItem<T> {
     /// Execute the update item operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.update_item", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

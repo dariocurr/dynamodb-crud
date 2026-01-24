@@ -118,6 +118,10 @@ impl<T: Serialize> TryFrom<BatchWriteItem<T>> for operation::batch_write_item::B
 
 impl<T: Serialize> BatchWriteItem<T> {
     /// Execute the batch write item operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.batch_write_item", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

@@ -25,7 +25,7 @@ Working with DynamoDB in Rust shouldn't mean manually building expression string
 
 ```toml
 [dependencies]
-dynamodb-crud = "0.1.0"
+dynamodb-crud = "0.1"
 ```
 
 ### Basic Operations
@@ -65,6 +65,21 @@ let get_item = read::get_item::GetItem {
     ..Default::default()
 };
 get_item.send(&client).await?;
+```
+
+### Tracing
+
+Enable the optional tracing feature to emit spans around DynamoDB operations:
+
+```toml
+[dependencies]
+dynamodb-crud = { version = "0.1", features = ["tracing"] }
+```
+
+```rust
+tracing_subscriber::fmt()
+    .with_env_filter("dynamodb_crud=debug")
+    .init();
 ```
 
 ### The Real Advantage: Complex Updates Without Expression Strings

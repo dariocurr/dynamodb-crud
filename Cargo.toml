@@ -35,6 +35,17 @@ features = [
     "aws-sdk-dynamodb+1",
 ]
 
+[dependencies.tracing]
+optional = true
+version = "0.1"
+
 [dev-dependencies]
 rstest = "0.26"
 serde_json = "1.0"
+
+[features]
+default = [
+]
+tracing = [
+    "dep:tracing",
+]
