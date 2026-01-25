@@ -62,6 +62,10 @@ impl<T: Serialize> TryFrom<Scan<T>> for ScanInput {
 
 impl<T: Serialize> Scan<T> {
     /// Execute the scan operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.scan", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

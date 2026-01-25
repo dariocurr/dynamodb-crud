@@ -91,6 +91,10 @@ impl<T: Serialize> TryFrom<Query<T>> for QueryInput {
 
 impl<T: Serialize> Query<T> {
     /// Execute the query operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.query", err)
+    )]
     pub async fn send(
         self,
         client: &Client,

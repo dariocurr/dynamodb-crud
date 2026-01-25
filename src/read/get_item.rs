@@ -65,6 +65,10 @@ impl<T: Serialize> TryFrom<GetItem<T>> for GetItemInput {
 
 impl<T: Serialize> GetItem<T> {
     /// Execute the get item operation.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "dynamodb_crud.get_item", err)
+    )]
     pub async fn send(
         self,
         client: &Client,
