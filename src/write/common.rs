@@ -5,6 +5,11 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result};
 use std::collections;
 
+/// Internal representation of write operation parameters.
+///
+/// This is an internal type that holds the processed write operation parameters
+/// after conversion from the public `WriteArgs` type. It contains the fully
+/// resolved expression strings and attribute mappings ready for DynamoDB API calls.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct WriteInput {
     pub(crate) condition_expression: Option<String>,
@@ -17,6 +22,16 @@ pub(crate) struct WriteInput {
     pub(crate) return_values_on_condition_check_failure:
         Option<types::ReturnValuesOnConditionCheckFailure>,
     pub(crate) table_name: String,
+}
+
+impl WriteInput {
+    /// Merge an expression operation into this write operation.
+    pub(crate) fn merge_expression(&mut self, operation: common::ExpressionInput) -> String {
+        operation.merge_into(
+            &mut self.expression_attribute_names,
+            &mut self.expression_attribute_values,
+        )
+    }
 }
 
 /// Arguments common to all write operations (Put, Update, Delete).

@@ -6,6 +6,9 @@ use serde::Serialize;
 use serde_dynamo::{Error, Result, to_attribute_value};
 use std::collections;
 
+/// Separator for attribute path components.
+const PATH_SEPARATOR: &str = ".";
+
 /// Map for ADD and DELETE operations.
 #[derive(Clone, Debug, PartialEq)]
 pub enum AddOrDeleteInputsMap<T> {
@@ -26,11 +29,11 @@ impl<T: Serialize> AddOrDeleteInputsMap<T> {
             Self::Leaves(leaves) => {
                 for (key, value) in leaves {
                     let (placeholder, new_keys) = common::add_placeholder(keys, &key);
-                    let path = new_keys.join(".");
+                    let path = new_keys.join(PATH_SEPARATOR);
                     let value = to_attribute_value(value)?;
-                    let value_placeholder = format!(":add_or_delete{}", index);
+                    let value_placeholder = format!(":add_or_delete{index}");
                     *index += 1;
-                    let expression = format!("{} {}", path, value_placeholder);
+                    let expression = format!("{path} {value_placeholder}");
                     let expression_attribute_names =
                         collections::HashMap::from([(placeholder, key)]);
                     let expression_attribute_values =
@@ -88,28 +91,27 @@ impl<T> SetInput<T> {
     fn get_set_expression(self, path: &str, value_placeholder: &str) -> (T, String) {
         match self {
             SetInput::Assign(value) => {
-                let expression = format!("{} = {}", path, value_placeholder);
+                let expression = format!("{path} = {value_placeholder}");
                 (value, expression)
             }
             SetInput::Increment(value) => {
-                let expression = format!("{} = {} + {}", path, path, value_placeholder);
+                let expression = format!("{path} = {path} + {value_placeholder}");
                 (value, expression)
             }
             SetInput::Decrement(value) => {
-                let expression = format!("{} = {} - {}", path, path, value_placeholder);
+                let expression = format!("{path} = {path} - {value_placeholder}");
                 (value, expression)
             }
             SetInput::ListAppend(value) => {
-                let expression = format!("{} = list_append({}, {})", path, path, value_placeholder);
+                let expression = format!("{path} = list_append({path}, {value_placeholder})");
                 (value, expression)
             }
             SetInput::ListPrepend(value) => {
-                let expression = format!("{} = list_append({}, {})", path, value_placeholder, path);
+                let expression = format!("{path} = list_append({value_placeholder}, {path})");
                 (value, expression)
             }
             SetInput::IfNotExists(value) => {
-                let expression =
-                    format!("{} = if_not_exists({}, {})", path, path, value_placeholder);
+                let expression = format!("{path} = if_not_exists({path}, {value_placeholder})");
                 (value, expression)
             }
         }
@@ -136,8 +138,8 @@ impl<T: Serialize> SetInputsMap<T> {
             Self::Leaves(leaves) => {
                 for (key, set_operation) in leaves {
                     let (placeholder, new_keys) = common::add_placeholder(keys, &key);
-                    let path = new_keys.join(".");
-                    let value_placeholder = format!(":set{}", index);
+                    let path = new_keys.join(PATH_SEPARATOR);
+                    let value_placeholder = format!(":set{index}");
                     let (value, expression) =
                         set_operation.get_set_expression(&path, &value_placeholder);
                     let value = to_attribute_value(value)?;
@@ -299,11 +301,8 @@ impl<T: Serialize> TryFrom<UpdateItem<T>> for UpdateItemInput {
     fn try_from(update_item: UpdateItem<T>) -> Result<Self> {
         let keys = update_item.keys.try_into()?;
         let mut write_operation: write::common::WriteInput = update_item.write_args.try_into()?;
-        let operation: common::ExpressionInput = update_item.update_expression.try_into()?;
-        let update_expression = operation.merge_into(
-            &mut write_operation.expression_attribute_names,
-            &mut write_operation.expression_attribute_values,
-        );
+        let operation = update_item.update_expression.try_into()?;
+        let update_expression = write_operation.merge_expression(operation);
         let operation = Self {
             keys,
             update_expression,

@@ -75,9 +75,9 @@ impl<T: Serialize> Condition<T> {
         let mut expression_attribute_values = collections::HashMap::new();
         let expression = match self {
             Self::BeginsWith(prefix) => {
-                let value_placeholder = format!(":{}_begins_with{}", key, index);
+                let value_placeholder = format!(":{key}_begins_with{index}");
                 *index += 1;
-                let expression = format!("begins_with({}, {})", key_placeholder, value_placeholder);
+                let expression = format!("begins_with({key_placeholder}, {value_placeholder})");
                 expression_attribute_values
                     .insert(value_placeholder, types::AttributeValue::S(prefix));
                 expression
@@ -85,13 +85,12 @@ impl<T: Serialize> Condition<T> {
             Self::Between(value1, value2) => {
                 let value1 = to_attribute_value(value1)?;
                 let value2 = to_attribute_value(value2)?;
-                let value_placeholder_1 = format!(":{}_between{}", key, index);
+                let value_placeholder_1 = format!(":{key}_between{index}");
                 *index += 1;
-                let value_placeholder_2 = format!(":{}_between{}", key, index);
+                let value_placeholder_2 = format!(":{key}_between{index}");
                 *index += 1;
                 let expression = format!(
-                    "{} BETWEEN {} AND {}",
-                    key_placeholder, value_placeholder_1, value_placeholder_2
+                    "{key_placeholder} BETWEEN {value_placeholder_1} AND {value_placeholder_2}"
                 );
                 expression_attribute_values.insert(value_placeholder_1, value1);
                 expression_attribute_values.insert(value_placeholder_2, value2);
@@ -99,33 +98,33 @@ impl<T: Serialize> Condition<T> {
             }
             Self::Contains(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_contains{}", key, index);
+                let value_placeholder = format!(":{key}_contains{index}");
                 *index += 1;
-                let expression = format!("contains({}, {})", key_placeholder, value_placeholder);
+                let expression = format!("contains({key_placeholder}, {value_placeholder})");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::Equals(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_eq{}", key, index);
+                let value_placeholder = format!(":{key}_eq{index}");
                 *index += 1;
-                let expression = format!("{} = {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} = {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::GreaterThan(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_gt{}", key, index);
+                let value_placeholder = format!(":{key}_gt{index}");
                 *index += 1;
-                let expression = format!("{} > {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} > {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::GreaterThanOrEqual(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_gte{}", key, index);
+                let value_placeholder = format!(":{key}_gte{index}");
                 *index += 1;
-                let expression = format!("{} >= {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} >= {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
@@ -133,52 +132,51 @@ impl<T: Serialize> Condition<T> {
                 let mut placeholders = Vec::with_capacity(values.len());
                 for (in_index, value) in values.into_iter().enumerate() {
                     let value = to_attribute_value(value)?;
-                    let placeholder = format!(":{}_in{}_{}", key, index, in_index);
+                    let placeholder = format!(":{key}_in{index}_{in_index}");
                     *index += 1;
                     expression_attribute_values.insert(placeholder.clone(), value);
                     placeholders.push(placeholder);
                 }
                 let placeholders = placeholders.join(", ");
-                format!("{} IN ({})", key_placeholder, placeholders)
+                format!("{key_placeholder} IN ({placeholders})")
             }
             Self::LessThan(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_lt{}", key, index);
+                let value_placeholder = format!(":{key}_lt{index}");
                 *index += 1;
-                let expression = format!("{} < {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} < {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::LessThanOrEqual(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_lte{}", key, index);
+                let value_placeholder = format!(":{key}_lte{index}");
                 *index += 1;
-                let expression = format!("{} <= {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} <= {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::NotContains(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_not_contains{}", key, index);
+                let value_placeholder = format!(":{key}_not_contains{index}");
                 *index += 1;
-                let expression =
-                    format!("NOT contains({}, {})", key_placeholder, value_placeholder);
+                let expression = format!("NOT contains({key_placeholder}, {value_placeholder})");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::NotEqual(value) => {
                 let value = to_attribute_value(value)?;
-                let value_placeholder = format!(":{}_ne{}", key, index);
+                let value_placeholder = format!(":{key}_ne{index}");
                 *index += 1;
-                let expression = format!("{} <> {}", key_placeholder, value_placeholder);
+                let expression = format!("{key_placeholder} <> {value_placeholder}");
                 expression_attribute_values.insert(value_placeholder, value);
                 expression
             }
             Self::NotNull => {
-                format!("attribute_exists({})", key_placeholder)
+                format!("attribute_exists({key_placeholder})")
             }
             Self::Null => {
-                format!("attribute_not_exists({})", key_placeholder)
+                format!("attribute_not_exists({key_placeholder})")
             }
         };
         Ok((expression, expression_attribute_values))

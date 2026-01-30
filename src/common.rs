@@ -16,7 +16,7 @@ use aws_sdk_dynamodb::types;
 use std::collections;
 
 pub(crate) fn add_placeholder(keys: &[String], identifier: &str) -> (String, Vec<String>) {
-    let placeholder = format!("#{}", identifier);
+    let placeholder = format!("#{identifier}");
     let mut new_keys = Vec::with_capacity(keys.len() + 1);
     new_keys.extend_from_slice(keys);
     new_keys.push(placeholder.clone());
@@ -25,12 +25,12 @@ pub(crate) fn add_placeholder(keys: &[String], identifier: &str) -> (String, Vec
 
 fn get_expression(left: String, operator: &str, right: String) -> String {
     if left.is_empty() {
-        return right;
+        right
+    } else if right.is_empty() {
+        left
+    } else {
+        format!("{left}{operator}{right}")
     }
-    if right.is_empty() {
-        return left;
-    }
-    format!("{}{}{}", left, operator, right)
 }
 
 /// expression operation
