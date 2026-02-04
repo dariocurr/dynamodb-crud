@@ -11,10 +11,8 @@ on:
       - dev*
       - hotfix*
     types:
-      - edited
       - opened
       - ready_for_review
-      - reopened
       - synchronize
 
   workflow_call:
