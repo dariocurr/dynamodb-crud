@@ -33,7 +33,7 @@ jobs:
           toolchain: nightly
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: install rust dependencies
         run: cargo install cargo-audit cargo-udeps --locked
@@ -57,7 +57,7 @@ jobs:
           toolchain: stable
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: check docs
         run: cargo doc --no-deps
@@ -76,7 +76,7 @@ jobs:
           toolchain: stable
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: check format
         run: cargo fmt --check
@@ -97,7 +97,7 @@ jobs:
           toolchain: stable
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: run tests
         run: cargo test --no-fail-fast -- --nocapture --test-threads=1
