@@ -25,7 +25,7 @@ jobs:
           toolchain: stable
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: install cargo-release
         run: cargo install cargo-release
@@ -74,7 +74,7 @@ jobs:
           toolchain: stable
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2.8.2
+        uses: Swatinem/rust-cache@v2.9.1
 
       - name: merge main -> dev
         uses: devmasx/merge-branch@v1.4.0
