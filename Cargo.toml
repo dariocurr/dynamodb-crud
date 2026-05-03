@@ -25,9 +25,12 @@ categories = [
 readme = "README.md"
 
 [dependencies]
-aws-sdk-dynamodb = "1"
 indexmap = "2"
 serde = "1"
+
+[dependencies.aws-sdk-dynamodb]
+version = "1"
+default-features = false
 
 [dependencies.serde_dynamo]
 version = "4"
