@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: checkout origin repo
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: setup rust
         uses: dtolnay/rust-toolchain@master
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: create github release
         uses: softprops/action-gh-release@v3
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout origin repo
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: setup rust
         uses: dtolnay/rust-toolchain@master
@@ -85,7 +85,7 @@ jobs:
           type: now
 
       - name: checkout origin repo
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           ref: dev
 
