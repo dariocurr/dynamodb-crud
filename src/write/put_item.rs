@@ -4,6 +4,7 @@ use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result, to_item};
 use std::collections;
+use std::fmt;
 
 /// put item operation
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -53,7 +54,7 @@ impl<T: Serialize> TryFrom<PutItem<T>> for PutItemInput {
     }
 }
 
-impl<T: Serialize> PutItem<T> {
+impl<T: Serialize + fmt::Debug> PutItem<T> {
     /// Execute the put item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -64,13 +65,14 @@ impl<T: Serialize> PutItem<T> {
         client: &Client,
     ) -> Result<
         operation::put_item::PutItemOutput,
-        error::SdkError<operation::put_item::PutItemError>,
+        Box<error::SdkError<operation::put_item::PutItemError>>,
     > {
-        let put_item: PutItemInput = self.try_into().map_err(error::BuildError::other)?;
+        let put_item: PutItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client.put_item().set_item(Some(put_item.item));
-        crate::apply_write_operation!(builder, put_item.write_operation)
+        let output = crate::apply_write_operation!(builder, put_item.write_operation)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 

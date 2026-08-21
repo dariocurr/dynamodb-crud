@@ -4,6 +4,7 @@ use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result};
 use std::collections;
+use std::fmt;
 
 /// delete item operation
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -58,7 +59,7 @@ impl<T: Serialize> TryFrom<DeleteItem<T>> for DeleteItemInput {
     }
 }
 
-impl<T: Serialize> DeleteItem<T> {
+impl<T: Serialize + fmt::Debug> DeleteItem<T> {
     /// Execute the delete item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -69,13 +70,14 @@ impl<T: Serialize> DeleteItem<T> {
         client: &Client,
     ) -> Result<
         operation::delete_item::DeleteItemOutput,
-        error::SdkError<operation::delete_item::DeleteItemError>,
+        Box<error::SdkError<operation::delete_item::DeleteItemError>>,
     > {
-        let delete_item: DeleteItemInput = self.try_into().map_err(error::BuildError::other)?;
+        let delete_item: DeleteItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client.delete_item().set_key(Some(delete_item.keys));
-        crate::apply_write_operation!(builder, delete_item.write_operation)
+        let output = crate::apply_write_operation!(builder, delete_item.write_operation)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 

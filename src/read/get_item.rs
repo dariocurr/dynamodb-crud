@@ -4,6 +4,7 @@ use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result};
 use std::collections;
+use std::fmt;
 
 /// get item operation
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -63,7 +64,7 @@ impl<T: Serialize> TryFrom<GetItem<T>> for GetItemInput {
     }
 }
 
-impl<T: Serialize> GetItem<T> {
+impl<T: Serialize + fmt::Debug> GetItem<T> {
     /// Execute the get item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -74,16 +75,17 @@ impl<T: Serialize> GetItem<T> {
         client: &Client,
     ) -> Result<
         operation::get_item::GetItemOutput,
-        error::SdkError<operation::get_item::GetItemError>,
+        Box<error::SdkError<operation::get_item::GetItemError>>,
     > {
-        let get_item: GetItemInput = self.try_into().map_err(error::BuildError::other)?;
+        let get_item: GetItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .get_item()
             .set_key(Some(get_item.keys))
             .set_return_consumed_capacity(get_item.return_consumed_capacity);
-        crate::apply_single_read_operation!(builder, get_item.single_read_operation)
+        let output = crate::apply_single_read_operation!(builder, get_item.single_read_operation)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 

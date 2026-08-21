@@ -5,6 +5,7 @@ use indexmap::IndexMap;
 use serde::Serialize;
 use serde_dynamo::{Error, Result};
 use std::collections;
+use std::fmt;
 
 /// Batch get item operation.
 ///
@@ -74,7 +75,7 @@ impl<T: Serialize> TryFrom<BatchGetItem<T>> for operation::batch_get_item::Batch
     }
 }
 
-impl<T: Serialize> BatchGetItem<T> {
+impl<T: Serialize + fmt::Debug> BatchGetItem<T> {
     /// Execute the batch get item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -85,16 +86,17 @@ impl<T: Serialize> BatchGetItem<T> {
         client: &Client,
     ) -> Result<
         operation::batch_get_item::BatchGetItemOutput,
-        error::SdkError<operation::batch_get_item::BatchGetItemError>,
+        Box<error::SdkError<operation::batch_get_item::BatchGetItemError>>,
     > {
         let batch_get_item: operation::batch_get_item::BatchGetItemInput =
-            self.try_into().map_err(error::BuildError::other)?;
-        client
+            self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let output = client
             .batch_get_item()
             .set_request_items(batch_get_item.request_items)
             .set_return_consumed_capacity(batch_get_item.return_consumed_capacity)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 

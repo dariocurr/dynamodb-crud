@@ -3,6 +3,7 @@ use crate::{common, read};
 use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result};
+use std::fmt;
 
 /// query operation
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -89,7 +90,7 @@ impl<T: Serialize> TryFrom<Query<T>> for QueryInput {
     }
 }
 
-impl<T: Serialize> Query<T> {
+impl<T: Serialize + fmt::Debug> Query<T> {
     /// Execute the query operation.
     #[cfg_attr(
         feature = "tracing",
@@ -98,8 +99,11 @@ impl<T: Serialize> Query<T> {
     pub async fn send(
         self,
         client: &Client,
-    ) -> Result<operation::query::QueryOutput, error::SdkError<operation::query::QueryError>> {
-        let query: QueryInput = self.try_into().map_err(error::BuildError::other)?;
+    ) -> Result<
+        operation::query::QueryOutput,
+        Box<error::SdkError<operation::query::QueryError>>,
+    > {
+        let query: QueryInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .query()
             .key_condition_expression(query.key_condition_expression)

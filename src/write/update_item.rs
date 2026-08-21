@@ -5,6 +5,7 @@ use indexmap::IndexMap;
 use serde::Serialize;
 use serde_dynamo::{Error, Result, to_attribute_value};
 use std::collections;
+use std::fmt;
 
 /// Separator for attribute path components.
 const PATH_SEPARATOR: &str = ".";
@@ -312,7 +313,7 @@ impl<T: Serialize> TryFrom<UpdateItem<T>> for UpdateItemInput {
     }
 }
 
-impl<T: Serialize> UpdateItem<T> {
+impl<T: Serialize + fmt::Debug> UpdateItem<T> {
     /// Execute the update item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -323,16 +324,17 @@ impl<T: Serialize> UpdateItem<T> {
         client: &Client,
     ) -> Result<
         operation::update_item::UpdateItemOutput,
-        error::SdkError<operation::update_item::UpdateItemError>,
+        Box<error::SdkError<operation::update_item::UpdateItemError>>,
     > {
-        let update_item: UpdateItemInput = self.try_into().map_err(error::BuildError::other)?;
+        let update_item: UpdateItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .update_item()
             .set_key(Some(update_item.keys))
             .update_expression(update_item.update_expression);
-        crate::apply_write_operation!(builder, update_item.write_operation)
+        let output = crate::apply_write_operation!(builder, update_item.write_operation)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 
