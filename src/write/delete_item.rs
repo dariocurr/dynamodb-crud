@@ -72,7 +72,9 @@ impl<T: Serialize + fmt::Debug> DeleteItem<T> {
         operation::delete_item::DeleteItemOutput,
         Box<error::SdkError<operation::delete_item::DeleteItemError>>,
     > {
-        let delete_item: DeleteItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let delete_item: DeleteItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client.delete_item().set_key(Some(delete_item.keys));
         let output = crate::apply_write_operation!(builder, delete_item.write_operation)
             .send()

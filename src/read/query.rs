@@ -99,11 +99,11 @@ impl<T: Serialize + fmt::Debug> Query<T> {
     pub async fn send(
         self,
         client: &Client,
-    ) -> Result<
-        operation::query::QueryOutput,
-        Box<error::SdkError<operation::query::QueryError>>,
-    > {
-        let query: QueryInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+    ) -> Result<operation::query::QueryOutput, Box<error::SdkError<operation::query::QueryError>>>
+    {
+        let query: QueryInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .query()
             .key_condition_expression(query.key_condition_expression)

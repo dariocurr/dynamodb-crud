@@ -71,7 +71,9 @@ impl<T: Serialize + fmt::Debug> Scan<T> {
         self,
         client: &Client,
     ) -> Result<operation::scan::ScanOutput, Box<error::SdkError<operation::scan::ScanError>>> {
-        let scan: ScanInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let scan: ScanInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .scan()
             .set_return_consumed_capacity(scan.return_consumed_capacity)

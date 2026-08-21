@@ -326,7 +326,9 @@ impl<T: Serialize + fmt::Debug> UpdateItem<T> {
         operation::update_item::UpdateItemOutput,
         Box<error::SdkError<operation::update_item::UpdateItemError>>,
     > {
-        let update_item: UpdateItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let update_item: UpdateItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .update_item()
             .set_key(Some(update_item.keys))

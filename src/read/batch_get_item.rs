@@ -88,8 +88,9 @@ impl<T: Serialize + fmt::Debug> BatchGetItem<T> {
         operation::batch_get_item::BatchGetItemOutput,
         Box<error::SdkError<operation::batch_get_item::BatchGetItemError>>,
     > {
-        let batch_get_item: operation::batch_get_item::BatchGetItemInput =
-            self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let batch_get_item: operation::batch_get_item::BatchGetItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let output = client
             .batch_get_item()
             .set_request_items(batch_get_item.request_items)

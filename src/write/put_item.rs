@@ -67,7 +67,9 @@ impl<T: Serialize + fmt::Debug> PutItem<T> {
         operation::put_item::PutItemOutput,
         Box<error::SdkError<operation::put_item::PutItemError>>,
     > {
-        let put_item: PutItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let put_item: PutItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client.put_item().set_item(Some(put_item.item));
         let output = crate::apply_write_operation!(builder, put_item.write_operation)
             .send()

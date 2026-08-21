@@ -130,8 +130,9 @@ impl<T: Serialize + fmt::Debug> BatchWriteItem<T> {
         operation::batch_write_item::BatchWriteItemOutput,
         Box<error::SdkError<operation::batch_write_item::BatchWriteItemError>>,
     > {
-        let batch_write_item: operation::batch_write_item::BatchWriteItemInput =
-            self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let batch_write_item: operation::batch_write_item::BatchWriteItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let output = client
             .batch_write_item()
             .set_request_items(batch_write_item.request_items)

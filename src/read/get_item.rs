@@ -77,7 +77,9 @@ impl<T: Serialize + fmt::Debug> GetItem<T> {
         operation::get_item::GetItemOutput,
         Box<error::SdkError<operation::get_item::GetItemError>>,
     > {
-        let get_item: GetItemInput = self.try_into().map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let get_item: GetItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .get_item()
             .set_key(Some(get_item.keys))
