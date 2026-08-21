@@ -4,6 +4,7 @@ use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result, to_item};
 use std::collections;
+use std::fmt;
 
 /// A put item request within a batch write operation.
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -116,7 +117,7 @@ impl<T: Serialize> TryFrom<BatchWriteItem<T>> for operation::batch_write_item::B
     }
 }
 
-impl<T: Serialize> BatchWriteItem<T> {
+impl<T: Serialize + fmt::Debug> BatchWriteItem<T> {
     /// Execute the batch write item operation.
     #[cfg_attr(
         feature = "tracing",
@@ -127,17 +128,19 @@ impl<T: Serialize> BatchWriteItem<T> {
         client: &Client,
     ) -> Result<
         operation::batch_write_item::BatchWriteItemOutput,
-        error::SdkError<operation::batch_write_item::BatchWriteItemError>,
+        Box<error::SdkError<operation::batch_write_item::BatchWriteItemError>>,
     > {
-        let batch_write_item: operation::batch_write_item::BatchWriteItemInput =
-            self.try_into().map_err(error::BuildError::other)?;
-        client
+        let batch_write_item: operation::batch_write_item::BatchWriteItemInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
+        let output = client
             .batch_write_item()
             .set_request_items(batch_write_item.request_items)
             .set_return_consumed_capacity(batch_write_item.return_consumed_capacity)
             .set_return_item_collection_metrics(batch_write_item.return_item_collection_metrics)
             .send()
-            .await
+            .await?;
+        Ok(output)
     }
 }
 

@@ -3,6 +3,7 @@ use crate::read;
 use aws_sdk_dynamodb::{Client, error, operation, types};
 use serde::Serialize;
 use serde_dynamo::{Error, Result};
+use std::fmt;
 
 /// scan operation
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -60,7 +61,7 @@ impl<T: Serialize> TryFrom<Scan<T>> for ScanInput {
     }
 }
 
-impl<T: Serialize> Scan<T> {
+impl<T: Serialize + fmt::Debug> Scan<T> {
     /// Execute the scan operation.
     #[cfg_attr(
         feature = "tracing",
@@ -69,8 +70,10 @@ impl<T: Serialize> Scan<T> {
     pub async fn send(
         self,
         client: &Client,
-    ) -> Result<operation::scan::ScanOutput, error::SdkError<operation::scan::ScanError>> {
-        let scan: ScanInput = self.try_into().map_err(error::BuildError::other)?;
+    ) -> Result<operation::scan::ScanOutput, Box<error::SdkError<operation::scan::ScanError>>> {
+        let scan: ScanInput = self
+            .try_into()
+            .map_err(|e| Box::new(error::SdkError::construction_failure(e)))?;
         let builder = client
             .scan()
             .set_return_consumed_capacity(scan.return_consumed_capacity)
